@@ -1,4 +1,5 @@
 import os
+import pickle
 from abc import ABC, abstractmethod
 
 #МОДЕЛИ
@@ -90,32 +91,35 @@ class Library:
     def __init__(self):
         self.__books = []
         self.__users = []
-        self.__librarians = []
-
         self.load_data()
 
-#ЗАГРУЗКА / СОХРАНЕНИЕ
+class Library:
+    def __init__(self):
+        self.__books = []
+        self.__users = []
+        self.load_data()
+
+ #PICKLE
     def load_data(self):
-        if os.path.exists("books.txt"):
-            with open("books.txt", "r", encoding="utf-8") as f:
-                for line in f:
-                    self.__books.append(Book.from_file_string(line))
-
-        if os.path.exists("users.txt"):
-            with open("users.txt", "r", encoding="utf-8") as f:
-                for line in f:
-                    self.__users.append(User.from_file_string(line))
-
-    
+        if os.path.exists("library.pkl"):
+            with open("library.pkl", "rb") as f:
+                data = pickle.load(f)
+                self.__books = data["books"]
+                self.__users = data["users"]
+                print("Данные загружены из файла.")
+        else:
+            print("Файл данных не найден. Создана новая библиотека.")
 
     def save_data(self):
-        with open("books.txt", "w", encoding="utf-8") as f:
-            for book in self.__books:
-                f.write(book.to_file_string() + "\n")
+        with open("library.pkl", "wb") as f:
+            data = {
+                "books": self.__books,
+                "users": self.__users
+            }
+            pickle.dump(data, f)
+            print("Данные сохранены в файл.")
 
-        with open("users.txt", "w", encoding="utf-8") as f:
-            for user in self.__users:
-                f.write(user.to_file_string() + "\n")
+    
 
 
     # ФУНКЦИИ БИБЛИОТЕКАРЯ
@@ -124,12 +128,15 @@ class Library:
         print("Книга добавлена.")
 
     def remove_book(self, title):
-        for book in self.__books:
-            if book.get_title() == title:
-                self.__books.remove(book)
-                print("Книга удалена.")
+     for book in self.__books:
+        if book.get_title() == title:
+            if not book.is_available():  # проверка статуса
+                print("Невозможно удалить книгу — она уже выдана!")
                 return
-        print("Книга не найдена.")
+            self.__books.remove(book)
+            print("Книга удалена.")
+            return
+    print("Книга не найдена.")
 
     def register_user(self, name):
         self.__users.append(User(name))
