@@ -93,12 +93,6 @@ class Library:
         self.__users = []
         self.load_data()
 
-class Library:
-    def __init__(self):
-        self.__books = []
-        self.__users = []
-        self.load_data()
-
  #PICKLE
     def load_data(self):
         if os.path.exists("library.pkl"):
